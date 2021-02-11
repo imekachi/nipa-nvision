@@ -5,3 +5,7 @@
 body {
   @apply bg-gray-200;
 }
+/* Override filePond CSS which makes the green gradient on preview image in upload success state */
+#fileUploadWrapper .filepond--image-preview-overlay-success {
+  color: rgba(50, 50, 50, 0.65);
+}
