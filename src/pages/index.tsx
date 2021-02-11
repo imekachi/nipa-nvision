@@ -7,7 +7,10 @@ import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
 import { ObjectDetectionResult } from '@nipacloud/nvision/dist/models/NvisionRequest'
 import { useRef, useState } from 'react'
 import { convertFileToBase64 } from '../utils/files'
-import { getObjectDetectionService } from '../operations/nvision'
+import {
+  getBoundingBoxStyle,
+  getObjectDetectionService,
+} from '../operations/nvision'
 import { getImageDimensionFromPreviewElement } from '../utils/filePond'
 import { ProcessServerConfigFunction } from 'filepond'
 
@@ -84,19 +87,24 @@ export default function Index() {
             <FilePond
               // @ts-ignore
               imagePreviewHeight={300}
+              onremovefile={() => setState(defaultState)}
               server={{ process: processImage }}
             />
             {!state.isLoading && !!state.detectedObjects && (
               <div
-                className="absolute top-0 left-0 right-0 bottom-0 m-auto"
+                className="absolute top-0 left-0 right-0 bottom-0 m-auto pointer-events-none"
                 style={state.previewDimension}
               >
-                <div className="absolute" />
-                {/*{state.detectedObjects.map((detectedObject, objectIndex) => {*/}
-                {/*  return (*/}
-                {/*    <div key={objectIndex} className="absolute" />*/}
-                {/*  )*/}
-                {/*})}*/}
+                {state.detectedObjects.map((detectedObject, objectIndex) => (
+                  <div
+                    key={objectIndex}
+                    className="absolute border-solid border-2 border-green-400"
+                    style={getBoundingBoxStyle(
+                      detectedObject.bounding_box,
+                      state.previewScalingFactor
+                    )}
+                  />
+                ))}
               </div>
             )}
           </div>

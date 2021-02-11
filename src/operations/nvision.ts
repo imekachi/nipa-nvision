@@ -18,3 +18,27 @@ export async function getObjectDetectionService(): Promise<ObjectDetectionServic
 
   return objectDetectionService
 }
+
+export function getBoundingBoxStyle(
+  boundingBox: {
+    top: number
+    bottom: number
+    left: number
+    right: number
+  },
+  scalingFactor = 1
+): {
+  top: number
+  left: number
+  width: number
+  height: number
+} {
+  const width = boundingBox.right - boundingBox.left
+  const height = boundingBox.bottom - boundingBox.top
+  return {
+    top: boundingBox.top * scalingFactor,
+    left: boundingBox.left * scalingFactor,
+    width: width * scalingFactor,
+    height: height * scalingFactor,
+  }
+}
