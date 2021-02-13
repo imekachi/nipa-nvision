@@ -1,0 +1,6 @@
+@layer components {
+  .iconContainer {
+    @apply self-center text-xl text-center;
+    min-width: 1.5em;
+  }
+}

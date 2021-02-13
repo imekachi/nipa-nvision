@@ -1,7 +1,9 @@
 import { Sdk } from '@nipacloud/nvision/dist/Sdk'
 import getNextConfig from 'next/config'
+import { convertFileToBase64 } from '../utils/files'
 
 export type ObjectDetectionService = ReturnType<typeof Sdk.objectDetection>
+// Cache object detection service instance
 let objectDetectionService: ObjectDetectionService
 
 const { publicRuntimeConfig } = getNextConfig()
@@ -17,6 +19,20 @@ export async function getObjectDetectionService(): Promise<ObjectDetectionServic
   }
 
   return objectDetectionService
+}
+
+export async function detectObjectFromImage(file: File) {
+  // Get base64 from file
+  const base64 = await convertFileToBase64(file, {
+    withoutHeader: true,
+  })
+  // Get object detection service
+  const detectionService = await getObjectDetectionService()
+  return detectionService.predict({
+    rawData: base64,
+    outputCroppedImage: false,
+    confidenceThreshold: 0.2,
+  })
 }
 
 export function getBoundingBoxStyle(

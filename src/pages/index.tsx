@@ -3,16 +3,13 @@ import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orien
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
 import 'filepond/dist/filepond.min.css'
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
-// import styles from '../styles/Index.module.css'
 import { ObjectDetectionResult } from '@nipacloud/nvision/dist/models/NvisionRequest'
 import { useRef, useState } from 'react'
-import { convertFileToBase64 } from '../utils/files'
-import {
-  getBoundingBoxStyle,
-  getObjectDetectionService,
-} from '../operations/nvision'
+import { detectObjectFromImage } from '../operations/nvision'
 import { getImageDimensionFromPreviewElement } from '../utils/filePond'
 import { ProcessServerConfigFunction } from 'filepond'
+import BoundingBox from '../components/BoundingBox'
+import DetectionResult from '../components/DetectionResult'
 
 // Register FilePond  plugins
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview)
@@ -30,6 +27,9 @@ const defaultState = {
 
 export default function Index() {
   const [state, setState] = useState<MainState>(defaultState)
+  const [activeObjectIndex, setActiveObjectIndex] = useState<number | null>(
+    null
+  )
   const fileContainerRef = useRef<HTMLDivElement>(null)
 
   const processImage: ProcessServerConfigFunction = async (
@@ -39,27 +39,21 @@ export default function Index() {
     load,
     error
   ) => {
-    // Get base64 from file
-    const base64 = await convertFileToBase64(file, {
-      withoutHeader: true,
-    })
-    const objectDetectionService = await getObjectDetectionService()
     try {
+      console.log(`> metadata: `, metadata)
       setState({ isLoading: true })
-      const response = await objectDetectionService.predict({
-        rawData: base64,
-      })
-      console.log(`> response: `, response)
+      const result = await detectObjectFromImage(file)
+      console.log(`> result: `, result)
       const dimensions = getImageDimensionFromPreviewElement(
         fileContainerRef.current as HTMLDivElement
       )
       // Tell filePond, the processing is done
-      load(response.service_id as string)
+      load(result.service_id as string)
 
       setState({
         isLoading: false,
         // @ts-ignore, it actually "detected_objects" not "detected_object" as declared in the package
-        detectedObjects: response.detected_objects,
+        detectedObjects: result.detected_objects,
         previewDimension: dimensions.previewDimension,
         imageDimension: dimensions.imageDimension,
         previewScalingFactor: dimensions.previewScalingFactor,
@@ -78,7 +72,7 @@ export default function Index() {
         Nipa Nvision - Object Detection
       </h1>
       <div className="m-4">
-        <div className="rounded-2xl py-6 px-8 bg-white shadow-md">
+        <div className="rounded-2xl p-6 bg-white shadow-md">
           <div
             id="fileUploadWrapper"
             className="relative"
@@ -95,20 +89,30 @@ export default function Index() {
                 className="absolute top-0 left-0 right-0 bottom-0 m-auto pointer-events-none"
                 style={state.previewDimension}
               >
-                {state.detectedObjects.map((detectedObject, objectIndex) => (
-                  <div
-                    key={objectIndex}
-                    className="absolute border-solid border-2 border-green-400"
-                    style={getBoundingBoxStyle(
-                      detectedObject.bounding_box,
-                      state.previewScalingFactor
-                    )}
-                  />
-                ))}
+                {state.detectedObjects.map((detectedObject, objectIndex) => {
+                  if (
+                    Number.isFinite(activeObjectIndex) &&
+                    activeObjectIndex !== objectIndex
+                  ) {
+                    return null
+                  }
+                  return (
+                    <BoundingBox
+                      key={objectIndex}
+                      detectedObject={detectedObject}
+                      scalingFactor={state.previewScalingFactor}
+                    />
+                  )
+                })}
               </div>
             )}
           </div>
         </div>
+        <DetectionResult
+          detectedObjects={state.detectedObjects}
+          activeObjectIndex={activeObjectIndex}
+          setActiveObjectIndex={setActiveObjectIndex}
+        />
       </div>
     </div>
   )
