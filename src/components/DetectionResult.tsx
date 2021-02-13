@@ -41,7 +41,7 @@ export default function DetectionResult({
     .sort((a, b) => b.detectedObject.confidence - a.detectedObject.confidence)
 
   return (
-    <section className="mt-8 text-gray-600">
+    <section className="text-gray-600">
       <h2 className="font-bold mb-4">Detection Result</h2>
       {/* Display category filter only when there are 2 or more categories */}
       {categories.size > 1 && (

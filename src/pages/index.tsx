@@ -120,13 +120,25 @@ export default function Index() {
             )}
           </div>
         </div>
-        <DetectionResult
-          detectedObjects={state.detectedObjects}
-          activeObjectIndex={activeObjectIndex}
-          setActiveObjectIndex={setActiveObjectIndex}
-          activeCategory={activeCategory}
-          setActiveCategory={setActiveCategory}
-        />
+        <div className="mt-8">
+          {!state.isLoading &&
+          state.imageDimension &&
+          !state.detectedObjects ? (
+            <div className="text-center text-gray-500">
+              We cannot detect anything,
+              <br />
+              you can try another image :)
+            </div>
+          ) : (
+            <DetectionResult
+              detectedObjects={state.detectedObjects}
+              activeObjectIndex={activeObjectIndex}
+              setActiveObjectIndex={setActiveObjectIndex}
+              activeCategory={activeCategory}
+              setActiveCategory={setActiveCategory}
+            />
+          )}
+        </div>
       </div>
     </div>
   )
