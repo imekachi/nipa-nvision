@@ -1,11 +1,11 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { ObjectDetectionResult } from '@nipacloud/nvision/dist/models/NvisionRequest'
 import {
   defaultObjectCategoryConfig,
   objectCategory,
   ObjectCategoryName,
 } from '../config/nvision'
 import { getBoundingBoxStyle } from '../operations/nvision'
-import { ObjectDetectionResult } from '@nipacloud/nvision/dist/models/NvisionRequest'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 interface BoundingBoxProps {
   detectedObject: ObjectDetectionResult

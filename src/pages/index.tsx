@@ -1,15 +1,15 @@
-import { FilePond, registerPlugin } from 'react-filepond'
+import { ObjectDetectionResult } from '@nipacloud/nvision/dist/models/NvisionRequest'
+import { ProcessServerConfigFunction } from 'filepond'
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation'
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
-import 'filepond/dist/filepond.min.css'
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
-import { ObjectDetectionResult } from '@nipacloud/nvision/dist/models/NvisionRequest'
+import 'filepond/dist/filepond.min.css'
 import { useRef, useState } from 'react'
-import { detectObjectFromImage } from '../operations/nvision'
-import { getImageDimensionFromPreviewElement } from '../utils/filePond'
-import { ProcessServerConfigFunction } from 'filepond'
+import { FilePond, registerPlugin } from 'react-filepond'
 import BoundingBox from '../components/BoundingBox'
 import DetectionResult from '../components/DetectionResult'
+import { detectObjectFromImage } from '../operations/nvision'
+import { getImageDimensionFromPreviewElement } from '../utils/filePond'
 
 // Register FilePond  plugins
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview)

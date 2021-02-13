@@ -1,10 +1,10 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ObjectDetectionResult } from '@nipacloud/nvision/dist/models/NvisionRequest'
 import {
   defaultObjectCategoryConfig,
   objectCategory,
   ObjectCategoryName,
 } from '../config/nvision'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { mathRoundDigits } from '../utils/number'
 import styles from './DetectionResult.module.css'
 
