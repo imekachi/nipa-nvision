@@ -1,6 +1,10 @@
 @layer components {
-  .iconContainer {
+  .cardIconContainer {
     @apply self-center text-xl text-center;
     min-width: 1.5em;
+  }
+  .categoryGrid {
+    @apply grid gap-2 py-4 mb-2;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   }
 }

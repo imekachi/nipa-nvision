@@ -8,6 +8,7 @@ import { useRef, useState } from 'react'
 import { FilePond, registerPlugin } from 'react-filepond'
 import BoundingBox from '../components/BoundingBox'
 import DetectionResult from '../components/DetectionResult'
+import { ObjectCategoryName } from '../config/nvision'
 import { detectObjectFromImage } from '../operations/nvision'
 import { getImageDimensionFromPreviewElement } from '../utils/filePond'
 
@@ -30,6 +31,10 @@ export default function Index() {
   const [activeObjectIndex, setActiveObjectIndex] = useState<number | null>(
     null
   )
+  const [
+    activeCategory,
+    setActiveCategory,
+  ] = useState<ObjectCategoryName | null>(null)
   const fileContainerRef = useRef<HTMLDivElement>(null)
 
   const processImage: ProcessServerConfigFunction = async (
@@ -64,7 +69,7 @@ export default function Index() {
     }
   }
 
-  console.log(`> state: `, state)
+  console.log(`> state: `, { activeCategory, activeObjectIndex, state })
 
   return (
     <div className="max-w-screen-sm mx-auto my-10">
@@ -91,8 +96,9 @@ export default function Index() {
               >
                 {state.detectedObjects.map((detectedObject, objectIndex) => {
                   if (
-                    Number.isFinite(activeObjectIndex) &&
-                    activeObjectIndex !== objectIndex
+                    (Number.isFinite(activeObjectIndex) &&
+                      activeObjectIndex !== objectIndex) ||
+                    (activeCategory && activeCategory !== detectedObject.parent)
                   ) {
                     return null
                   }
@@ -112,6 +118,8 @@ export default function Index() {
           detectedObjects={state.detectedObjects}
           activeObjectIndex={activeObjectIndex}
           setActiveObjectIndex={setActiveObjectIndex}
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
         />
       </div>
     </div>

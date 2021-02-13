@@ -12,6 +12,8 @@ interface DetectionResultProps {
   detectedObjects?: ObjectDetectionResult[]
   activeObjectIndex: number | null
   setActiveObjectIndex: (objectIndex: number | null) => void
+  activeCategory: ObjectCategoryName | null
+  setActiveCategory: (categoryName: ObjectCategoryName | null) => void
 }
 interface DetectedObjectWithId {
   originalIndex: number
@@ -21,21 +23,61 @@ export default function DetectionResult({
   detectedObjects,
   activeObjectIndex,
   setActiveObjectIndex,
+  activeCategory,
+  setActiveCategory,
 }: DetectionResultProps) {
   if (!detectedObjects) return null
-
+  // Using Set to make the category name unique
+  const categories = new Set<ObjectCategoryName>()
   const sortedObjects: DetectedObjectWithId[] = detectedObjects
-    .map((detectedObject, originalIndex) => ({
-      originalIndex: originalIndex,
-      detectedObject,
-    }))
+    .map((detectedObject, originalIndex) => {
+      // Save category to the categories set
+      categories.add(detectedObject.parent as ObjectCategoryName)
+      return {
+        originalIndex: originalIndex,
+        detectedObject,
+      }
+    })
     .sort((a, b) => b.detectedObject.confidence - a.detectedObject.confidence)
 
   return (
     <section className="mt-8 text-gray-600">
       <h2 className="font-bold mb-4">Detection Result</h2>
+      <ul className={styles.categoryGrid}>
+        {Array.from(categories).map((category) => {
+          const categoryConfig =
+            objectCategory[category] ?? defaultObjectCategoryConfig
+
+          const handleClickCategory = () => {
+            // Toggle active category to null or the clicked category
+            setActiveCategory(activeCategory === category ? null : category)
+            // Reset active object because it might not in the active category and will cause a bug
+            setActiveObjectIndex(null)
+          }
+
+          return (
+            <li
+              key={category}
+              className={`text-center cursor-pointer ${
+                activeCategory === category ? categoryConfig.colors.text : ''
+              }`}
+              onClick={handleClickCategory}
+            >
+              <FontAwesomeIcon className="text-lg" icon={categoryConfig.icon} />
+              <span className="block text-center text-xs capitalize">
+                {category}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
       <ul className="space-y-4">
         {sortedObjects.map(({ originalIndex, detectedObject }) => {
+          // Skip rendering cards that's not in the active if the activeCategory exists
+          if (activeCategory && activeCategory !== detectedObject.parent) {
+            return null
+          }
+
           const categoryConfig =
             objectCategory[detectedObject.parent as ObjectCategoryName] ??
             defaultObjectCategoryConfig
@@ -69,7 +111,7 @@ export default function DetectionResult({
               onClick={handleClickItem}
             >
               <div
-                className={`${styles.iconContainer} ${categoryConfig.colors.text}`}
+                className={`${styles.cardIconContainer} ${categoryConfig.colors.text}`}
               >
                 <FontAwesomeIcon icon={categoryConfig.icon} />
               </div>

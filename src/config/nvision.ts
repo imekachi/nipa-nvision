@@ -8,6 +8,7 @@ import { faPaw } from '@fortawesome/free-solid-svg-icons/faPaw'
 import { faPlug } from '@fortawesome/free-solid-svg-icons/faPlug'
 import { faQuestion } from '@fortawesome/free-solid-svg-icons/faQuestion'
 import { faSink } from '@fortawesome/free-solid-svg-icons/faSink'
+import { faSuitcaseRolling } from '@fortawesome/free-solid-svg-icons/faSuitcaseRolling'
 import { faUser } from '@fortawesome/free-solid-svg-icons/faUser'
 
 export type ObjectCategoryName =
@@ -108,19 +109,19 @@ export const objectCategory: Readonly<
     },
   },
   accessory: {
-    icon: faSink,
+    icon: faSuitcaseRolling,
     colors: {
-      text: 'text-red-500',
-      bg: 'bg-red-500',
-      border: 'border-red-500',
+      text: 'text-red-400',
+      bg: 'bg-red-400',
+      border: 'border-red-400',
     },
   },
   vehicle: {
     icon: faCar,
     colors: {
-      text: 'text-red-500',
-      bg: 'bg-red-500',
-      border: 'border-red-500',
+      text: 'text-indigo-400',
+      bg: 'bg-indigo-400',
+      border: 'border-indigo-400',
     },
   },
 })
