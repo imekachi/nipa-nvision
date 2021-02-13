@@ -43,34 +43,40 @@ export default function DetectionResult({
   return (
     <section className="mt-8 text-gray-600">
       <h2 className="font-bold mb-4">Detection Result</h2>
-      <ul className={styles.categoryGrid}>
-        {Array.from(categories).map((category) => {
-          const categoryConfig =
-            objectCategory[category] ?? defaultObjectCategoryConfig
+      {/* Display category filter only when there are 2 or more categories */}
+      {categories.size > 1 && (
+        <ul className={styles.categoryGrid}>
+          {Array.from(categories).map((category) => {
+            const categoryConfig =
+              objectCategory[category] ?? defaultObjectCategoryConfig
 
-          const handleClickCategory = () => {
-            // Toggle active category to null or the clicked category
-            setActiveCategory(activeCategory === category ? null : category)
-            // Reset active object because it might not in the active category and will cause a bug
-            setActiveObjectIndex(null)
-          }
+            const handleClickCategory = () => {
+              // Toggle active category to null or the clicked category
+              setActiveCategory(activeCategory === category ? null : category)
+              // Reset active object because it might not in the active category and will cause a bug
+              setActiveObjectIndex(null)
+            }
 
-          return (
-            <li
-              key={category}
-              className={`text-center cursor-pointer ${
-                activeCategory === category ? categoryConfig.colors.text : ''
-              }`}
-              onClick={handleClickCategory}
-            >
-              <FontAwesomeIcon className="text-lg" icon={categoryConfig.icon} />
-              <span className="block text-center text-xs capitalize">
-                {category}
-              </span>
-            </li>
-          )
-        })}
-      </ul>
+            return (
+              <li
+                key={category}
+                className={`text-center cursor-pointer ${
+                  activeCategory === category ? categoryConfig.colors.text : ''
+                }`}
+                onClick={handleClickCategory}
+              >
+                <FontAwesomeIcon
+                  className="text-lg"
+                  icon={categoryConfig.icon}
+                />
+                <span className="block text-center text-xs capitalize">
+                  {category}
+                </span>
+              </li>
+            )
+          })}
+        </ul>
+      )}
       <ul className="space-y-4">
         {sortedObjects.map(({ originalIndex, detectedObject }) => {
           // Skip rendering cards that's not in the active if the activeCategory exists
