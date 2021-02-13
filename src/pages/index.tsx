@@ -37,6 +37,12 @@ export default function Index() {
   ] = useState<ObjectCategoryName | null>(null)
   const fileContainerRef = useRef<HTMLDivElement>(null)
 
+  const resetAllState = () => {
+    setState(defaultState)
+    setActiveCategory(null)
+    setActiveObjectIndex(null)
+  }
+
   const processImage: ProcessServerConfigFunction = async (
     fieldName,
     file,
@@ -86,7 +92,7 @@ export default function Index() {
             <FilePond
               // @ts-ignore
               imagePreviewHeight={300}
-              onremovefile={() => setState(defaultState)}
+              onremovefile={resetAllState}
               server={{ process: processImage }}
             />
             {!state.isLoading && !!state.detectedObjects && (
