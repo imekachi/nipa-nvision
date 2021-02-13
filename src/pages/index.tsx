@@ -4,6 +4,7 @@ import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orien
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
 import 'filepond/dist/filepond.min.css'
+import Head from 'next/head'
 import { useRef, useState } from 'react'
 import { FilePond, registerPlugin } from 'react-filepond'
 import BoundingBox from '../components/BoundingBox'
@@ -79,6 +80,9 @@ export default function Index() {
 
   return (
     <div className="max-w-screen-sm mx-auto my-10">
+      <Head>
+        <title>Nvision Object Detection - Nipa Cloud</title>
+      </Head>
       <h1 className="text-3xl text-center mb-6 font-bold">
         Nipa Nvision - Object Detection
       </h1>
