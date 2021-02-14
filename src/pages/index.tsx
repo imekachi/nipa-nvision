@@ -3,6 +3,7 @@ import { faImage } from '@fortawesome/free-solid-svg-icons/faImage'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ObjectDetectionResult } from '@nipacloud/nvision/dist/models/NvisionRequest'
 import Head from 'next/head'
+import NextImg from 'next/image'
 import { useState } from 'react'
 import BoundingBox from '../components/BoundingBox'
 import Camera, { SnapPhotoData } from '../components/Camera'
@@ -88,7 +89,14 @@ export default function Index() {
         <title>Nvision Object Detection - Nipa Cloud</title>
       </Head>
       <h1 className="text-3xl text-center mb-6 font-bold">
-        Nipa Nvision - Object Detection
+        <span className="inline-block w-6">
+          <NextImg
+            src="https://nvision.nipa.cloud/img/Home.e24230e1.png"
+            width={1144}
+            height={1067}
+          />
+        </span>{' '}
+        Nvision Object Detection
       </h1>
       <div className="p-4">
         <div className="rounded-2xl p-6 bg-white shadow-md">
