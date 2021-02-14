@@ -42,23 +42,43 @@ export default function Camera(props: CameraProps) {
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
 
   const handleSnap = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
     if (videoRef.current && canvasRef.current) {
       const context = canvasRef.current.getContext('2d')
       if (context) {
-        context.drawImage(videoRef.current, 0, 0, imageWidth, imageHeight)
+        const [streamTrack] = streamRef.current?.getTracks() ?? []
+        const streamInfo = streamTrack?.getSettings() ?? {}
+
+        const imageDimension = {
+          width: streamInfo.width ?? imageWidth,
+          height: streamInfo.height ?? imageHeight,
+        }
+        // We're using video as preview dimension because in this state
+        // The canvas doesn't get rendered and updated yet.
+        const previewDimension = {
+          width: videoRef.current.clientWidth,
+          height: videoRef.current.clientHeight,
+        }
+
+        // Make the canvas have exact same size as the video preview
+        canvasRef.current.width = previewDimension.width
+        canvasRef.current.height = previewDimension.height
+
+        context.drawImage(
+          videoRef.current,
+          0,
+          0,
+          imageDimension.width, // render using real image dimension
+          imageDimension.height
+        )
+
         setPreviewPhotoMode(true)
         const snapData = {
           base64: canvasRef.current.toDataURL(),
-          dimensions: {
-            imageDimension: { width: imageWidth, height: imageHeight },
-            previewDimension: {
-              width: videoRef.current.clientWidth,
-              height: videoRef.current.clientHeight,
-            },
-          },
+          dimensions: { imageDimension, previewDimension },
         }
         try {
           setIsProcessing(true)
@@ -83,15 +103,23 @@ export default function Camera(props: CameraProps) {
       const getMediaStream = async () => {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
+            video: {
+              aspectRatio: imageWidth / imageHeight,
+              width: { exact: imageWidth },
+              height: { exact: imageHeight },
+              // facingMode: { exact: 'environment' },
+            },
           })
           if (videoRef.current) {
+            // pass stream to video to live preview
             videoRef.current.srcObject = stream
             videoRef.current.play()
+            // save stream for cleaning
+            streamRef.current = stream
             setCameraErrorCode(null)
           }
         } catch (err) {
-          console.log(`> Error when requesting camera access `, err)
+          console.error(`> Error when requesting camera access `, err)
           setCameraErrorCode(
             err.message === 'Permission denied'
               ? 'PERMISSION_DENIED'
@@ -103,20 +131,32 @@ export default function Camera(props: CameraProps) {
     } else if (!cameraErrorCode || cameraErrorCode !== 'NOT_SUPPORTED') {
       setCameraErrorCode('NOT_SUPPORTED')
     }
-  }, [cameraErrorCode])
+
+    // Cleaning function
+    return () => {
+      // Stop using camera
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => {
+          track.stop()
+        })
+      }
+    }
+  }, [cameraErrorCode, imageHeight, imageWidth])
 
   return (
     <div>
       <div className="relative text-center bg-black rounded-2xl overflow-hidden flex items-center justify-center">
         {!!cameraErrorCode && (
-          <div className="absolute p-4 m-4 text-white rounded-lg bg-red-500">
+          <div className="p-4 m-4 text-white rounded-lg bg-red-500">
             <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
             {errorMessagesByCode[cameraErrorCode]}
           </div>
         )}
         <video
           ref={videoRef}
-          className={`max-w-full ${previewPhotoMode ? 'hidden' : ''}`}
+          className={`w-auto h-auto max-w-full max-h-full ${
+            previewPhotoMode || cameraErrorCode ? 'hidden' : ''
+          }`}
           style={{ transform: 'rotateY(180deg)' }}
           width={imageWidth}
           height={imageHeight}
@@ -124,9 +164,9 @@ export default function Camera(props: CameraProps) {
         />
         <canvas
           ref={canvasRef}
-          className={`max-w-full ${!previewPhotoMode ? 'hidden' : ''}`}
-          width={imageWidth}
-          height={imageHeight}
+          className={`max-w-full ${
+            !previewPhotoMode || cameraErrorCode ? 'hidden' : ''
+          }`}
         />
         {previewPhotoMode && (
           <div className="absolute top-0 right-0">

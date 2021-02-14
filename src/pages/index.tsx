@@ -57,7 +57,6 @@ export default function Index() {
   }: SnapPhotoData) => {
     setState({ isLoading: true })
     const result = await detectObjectFromImage(base64)
-    console.log(`> result: `, result)
 
     setState({
       isLoading: false,
@@ -80,8 +79,6 @@ export default function Index() {
     const imageId = await processImageDetection({ base64, dimensions })
     return imageId as string
   }
-
-  console.log(`> state: `, { activeCategory, activeObjectIndex, state })
 
   return (
     <div className="max-w-screen-sm mx-auto pt-10 pb-20">
