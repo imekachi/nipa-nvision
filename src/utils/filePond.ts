@@ -3,7 +3,6 @@ export function getImageDimensionFromPreviewElement(
 ): {
   imageDimension: { width: number; height: number }
   previewDimension: { width: number; height: number }
-  previewScalingFactor: number
 } {
   const previewEl = containerEl.querySelector(
     '.filepond--image-clip'
@@ -25,6 +24,5 @@ export function getImageDimensionFromPreviewElement(
   return {
     previewDimension,
     imageDimension,
-    previewScalingFactor: previewDimension.width / imageDimension.width,
   }
 }

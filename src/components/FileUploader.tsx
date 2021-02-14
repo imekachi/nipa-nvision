@@ -16,6 +16,7 @@ export interface ProcessFileData {
   errorHandler: (errorText: string) => void
 }
 
+// TODO: handle file type validation, only accept images
 interface FileUploaderProps {
   /**
    * Should return file id as a string for filepond

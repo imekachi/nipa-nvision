@@ -1,6 +1,6 @@
 import { Sdk } from '@nipacloud/nvision/dist/Sdk'
 import getNextConfig from 'next/config'
-import { convertFileToBase64 } from '../utils/files'
+import { removeBase64ImageHeader } from '../utils/files'
 
 export type ObjectDetectionService = ReturnType<typeof Sdk.objectDetection>
 // Cache object detection service instance
@@ -21,15 +21,11 @@ export async function getObjectDetectionService(): Promise<ObjectDetectionServic
   return objectDetectionService
 }
 
-export async function detectObjectFromImage(file: File) {
-  // Get base64 from file
-  const base64 = await convertFileToBase64(file, {
-    withoutHeader: true,
-  })
+export async function detectObjectFromImage(base64: string) {
   // Get object detection service
   const detectionService = await getObjectDetectionService()
   return detectionService.predict({
-    rawData: base64,
+    rawData: removeBase64ImageHeader(base64),
     outputCroppedImage: false,
     confidenceThreshold: 0.2,
   })
