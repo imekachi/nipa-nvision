@@ -1,6 +1,11 @@
+import { config as fontAwesomeConfig } from '@fortawesome/fontawesome-svg-core'
+import '@fortawesome/fontawesome-svg-core/styles.css' // Import fontawesome CSS
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import '../styles/global.css'
+
+// Tell Font Awesome to skip adding the CSS automatically since it's being imported above
+fontAwesomeConfig.autoAddCss = false
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
