@@ -1,5 +1,6 @@
 import { faCamera } from '@fortawesome/free-solid-svg-icons/faCamera'
 import { faCircleNotch } from '@fortawesome/free-solid-svg-icons/faCircleNotch'
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons/faExclamationTriangle'
 import { faUndo } from '@fortawesome/free-solid-svg-icons/faUndo'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useEffect, useRef, useState } from 'react'
@@ -11,6 +12,7 @@ export interface SnapPhotoData {
     previewDimension: { width: number; height: number }
   }
 }
+
 export interface CameraProps {
   imageWidth?: number
   imageHeight?: number
@@ -18,13 +20,25 @@ export interface CameraProps {
   onReset?: () => void
 }
 
-// TODO: handle unsupported browser
-// TODO: add flash effect
+type CameraErrorCode = 'NOT_SUPPORTED' | 'PERMISSION_DENIED' | 'NOT_FOUND'
+
+const errorMessagesByCode: Record<CameraErrorCode, string> = {
+  NOT_SUPPORTED:
+    'This browser is not supported, please try again in Google Chrome',
+  PERMISSION_DENIED: 'Please allow access to a camera',
+  NOT_FOUND: 'Cannot detect a camera',
+}
+
+// TODO: add flash effect when taking a photo
 export default function Camera(props: CameraProps) {
   const { onSnap, onReset, imageWidth = 400, imageHeight = 300 } = props
 
   const [previewPhotoMode, setPreviewPhotoMode] = useState<boolean>(false)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isProcessing, setIsProcessing] = useState<boolean>(false)
+  const [
+    cameraErrorCode,
+    setCameraErrorCode,
+  ] = useState<CameraErrorCode | null>(null)
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -47,12 +61,12 @@ export default function Camera(props: CameraProps) {
           },
         }
         try {
-          setIsLoading(true)
+          setIsProcessing(true)
           await onSnap?.(snapData)
         } catch (err) {
           console.error(`> Error! onSnap(): `, { err, snapData })
         } finally {
-          setIsLoading(false)
+          setIsProcessing(false)
         }
       }
     }
@@ -66,22 +80,40 @@ export default function Camera(props: CameraProps) {
 
   useEffect(() => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      // Not adding `{ audio: true }` since we only want video now
-      navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then(function (stream) {
-          //video.src = window.URL.createObjectURL(stream);
+      const getMediaStream = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          })
           if (videoRef.current) {
             videoRef.current.srcObject = stream
             videoRef.current.play()
+            setCameraErrorCode(null)
           }
-        })
+        } catch (err) {
+          console.log(`> Error when requesting camera access `, err)
+          setCameraErrorCode(
+            err.message === 'Permission denied'
+              ? 'PERMISSION_DENIED'
+              : 'NOT_FOUND'
+          )
+        }
+      }
+      getMediaStream()
+    } else if (!cameraErrorCode || cameraErrorCode !== 'NOT_SUPPORTED') {
+      setCameraErrorCode('NOT_SUPPORTED')
     }
-  }, [])
+  }, [cameraErrorCode])
 
   return (
     <div>
       <div className="relative text-center bg-black rounded-2xl overflow-hidden flex items-center justify-center">
+        {!!cameraErrorCode && (
+          <div className="absolute p-4 m-4 text-white rounded-lg bg-red-500">
+            <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
+            {errorMessagesByCode[cameraErrorCode]}
+          </div>
+        )}
         <video
           ref={videoRef}
           className={`max-w-full ${previewPhotoMode ? 'hidden' : ''}`}
@@ -98,7 +130,7 @@ export default function Camera(props: CameraProps) {
         />
         {previewPhotoMode && (
           <div className="absolute top-0 right-0">
-            {isLoading ? (
+            {isProcessing ? (
               <div className="p-4 text-pink-500">
                 <FontAwesomeIcon icon={faCircleNotch} spin />
               </div>
@@ -117,10 +149,10 @@ export default function Camera(props: CameraProps) {
       {/* Total height of the component should equal to the preview image height */}
       {/* Otherwise, the preview overlay will not be in the correct position */}
       {!previewPhotoMode && (
-        <div className="text-center">
+        <div className="text-center mt-4">
           <button
             title="Take a photo"
-            className="w-14 h-14 text-white rounded-full mt-4 focus:outline-none bg-pink-500"
+            className="w-14 h-14 text-white rounded-full focus:outline-none bg-pink-500"
             onClick={handleSnap}
           >
             <FontAwesomeIcon icon={faCamera} />
