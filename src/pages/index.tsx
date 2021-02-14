@@ -1,20 +1,11 @@
 import { ObjectDetectionResult } from '@nipacloud/nvision/dist/models/NvisionRequest'
-import { ProcessServerConfigFunction } from 'filepond'
-import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation'
-import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
-import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
-import 'filepond/dist/filepond.min.css'
 import Head from 'next/head'
-import { useRef, useState } from 'react'
-import { FilePond, registerPlugin } from 'react-filepond'
+import { useState } from 'react'
 import BoundingBox from '../components/BoundingBox'
 import DetectionResult from '../components/DetectionResult'
+import FileUploader, { ProcessFileData } from '../components/FileUploader'
 import { ObjectCategoryName } from '../config/nvision'
 import { detectObjectFromImage } from '../operations/nvision'
-import { getImageDimensionFromPreviewElement } from '../utils/filePond'
-
-// Register FilePond  plugins
-registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview)
 
 interface MainState {
   isLoading: boolean
@@ -36,7 +27,6 @@ export default function Index() {
     activeCategory,
     setActiveCategory,
   ] = useState<ObjectCategoryName | null>(null)
-  const fileContainerRef = useRef<HTMLDivElement>(null)
 
   const resetAllState = () => {
     setState(defaultState)
@@ -44,36 +34,20 @@ export default function Index() {
     setActiveObjectIndex(null)
   }
 
-  const processImage: ProcessServerConfigFunction = async (
-    fieldName,
-    file,
-    metadata,
-    load,
-    error
-  ) => {
-    try {
-      console.log(`> metadata: `, metadata)
-      setState({ isLoading: true })
-      const result = await detectObjectFromImage(file)
-      console.log(`> result: `, result)
-      const dimensions = getImageDimensionFromPreviewElement(
-        fileContainerRef.current as HTMLDivElement
-      )
-      // Tell filePond, the processing is done
-      load(result.service_id as string)
+  const processFile = async ({ file, dimensions }: ProcessFileData) => {
+    setState({ isLoading: true })
+    const result = await detectObjectFromImage(file)
+    console.log(`> result: `, result)
 
-      setState({
-        isLoading: false,
-        // @ts-ignore, it actually "detected_objects" not "detected_object" as declared in the package
-        detectedObjects: result.detected_objects,
-        previewDimension: dimensions.previewDimension,
-        imageDimension: dimensions.imageDimension,
-        previewScalingFactor: dimensions.previewScalingFactor,
-      })
-    } catch (err) {
-      // Tell filePond there is an error
-      error(err)
-    }
+    setState({
+      isLoading: false,
+      // @ts-ignore, it actually "detected_objects" not "detected_object" as declared in the package
+      detectedObjects: result.detected_objects,
+      previewDimension: dimensions.previewDimension,
+      imageDimension: dimensions.imageDimension,
+      previewScalingFactor: dimensions.previewScalingFactor,
+    })
+    return result.service_id as string
   }
 
   console.log(`> state: `, { activeCategory, activeObjectIndex, state })
@@ -88,16 +62,10 @@ export default function Index() {
       </h1>
       <div className="m-4">
         <div className="rounded-2xl p-6 bg-white shadow-md">
-          <div
-            id="fileUploadWrapper"
-            className="relative"
-            ref={fileContainerRef}
-          >
-            <FilePond
-              // @ts-ignore
-              imagePreviewHeight={300}
-              onremovefile={resetAllState}
-              server={{ process: processImage }}
+          <div className="relative">
+            <FileUploader
+              onProcessFile={processFile}
+              onRemoveFile={resetAllState}
             />
             {!state.isLoading && !!state.detectedObjects && (
               <div
