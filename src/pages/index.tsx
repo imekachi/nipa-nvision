@@ -90,7 +90,7 @@ export default function Index() {
       <h1 className="text-3xl text-center mb-6 font-bold">
         Nipa Nvision - Object Detection
       </h1>
-      <div className="m-4">
+      <div className="p-4">
         <div className="rounded-2xl p-6 bg-white shadow-md">
           <ul className="grid grid-cols-2 gap-4 text-center mb-8">
             <li

@@ -5,6 +5,10 @@
   }
   .categoryGrid {
     @apply grid gap-2 py-4 mb-2;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+  .detectedListWrapper {
+    @apply pt-2 pb-8 -mx-2 px-2 overflow-y-auto;
+    max-height: 400px;
   }
 }

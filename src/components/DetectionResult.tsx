@@ -77,69 +77,73 @@ export default function DetectionResult({
           })}
         </ul>
       )}
-      <ul className="space-y-4">
-        {sortedObjects.map(({ originalIndex, detectedObject }) => {
-          // Skip rendering cards that's not in the active if the activeCategory exists
-          if (activeCategory && activeCategory !== detectedObject.parent) {
-            return null
-          }
-
-          const categoryConfig =
-            objectCategory[detectedObject.parent as ObjectCategoryName] ??
-            defaultObjectCategoryConfig
-          const confidencePercent = mathRoundDigits(
-            detectedObject.confidence * 100,
-            2
-          )
-
-          const handleClickItem = () => {
-            // If click on the active index,
-            // reverse toggle it by setting activeObjectIndex to null,
-            // otherwise, set the originalIndex to be the active one
-            setActiveObjectIndex(
-              activeObjectIndex === originalIndex ? null : originalIndex
-            )
-          }
-
-          let activeClassName = 'shadow-md'
-          if (Number.isFinite(activeObjectIndex)) {
-            if (activeObjectIndex === originalIndex) {
-              activeClassName = 'shadow-xl'
-            } else {
-              activeClassName = 'shadow-none opacity-50'
+      <div className={styles.detectedListWrapper}>
+        <ul className="space-y-4">
+          {sortedObjects.map(({ originalIndex, detectedObject }) => {
+            // Skip rendering cards that's not in the active if the activeCategory exists
+            if (activeCategory && activeCategory !== detectedObject.parent) {
+              return null
             }
-          }
 
-          return (
-            <li
-              key={originalIndex}
-              className={`overflow-hidden py-4 p-6 bg-white rounded-2xl flex cursor-pointer transition duration-300 ease-in-out ${activeClassName}`}
-              onClick={handleClickItem}
-            >
-              <div
-                className={`${styles.cardIconContainer} ${categoryConfig.colors.text}`}
+            const categoryConfig =
+              objectCategory[detectedObject.parent as ObjectCategoryName] ??
+              defaultObjectCategoryConfig
+            const confidencePercent = mathRoundDigits(
+              detectedObject.confidence * 100,
+              2
+            )
+
+            const handleClickItem = () => {
+              // If click on the active index,
+              // reverse toggle it by setting activeObjectIndex to null,
+              // otherwise, set the originalIndex to be the active one
+              setActiveObjectIndex(
+                activeObjectIndex === originalIndex ? null : originalIndex
+              )
+            }
+
+            let activeClassName = 'shadow-md'
+            if (Number.isFinite(activeObjectIndex)) {
+              if (activeObjectIndex === originalIndex) {
+                activeClassName = 'shadow-xl'
+              } else {
+                activeClassName = 'shadow-none opacity-50'
+              }
+            }
+
+            return (
+              <li
+                key={originalIndex}
+                className={`overflow-hidden py-4 p-6 bg-white rounded-2xl flex cursor-pointer transition duration-300 ease-in-out ${activeClassName}`}
+                onClick={handleClickItem}
               >
-                <FontAwesomeIcon icon={categoryConfig.icon} />
-              </div>
-              <div className="ml-4 flex-1 capitalize">
-                <p className={`font-bold ${categoryConfig.colors.text}`}>
-                  {detectedObject.name}
-                </p>
-                <p className="text-xs text-gray-400">{detectedObject.parent}</p>
-              </div>
-              <div className="ml-2 w-14 text-right flex-shrink-0">
-                <div className="mb-2">{confidencePercent}%</div>
-                <div className="h-1 bg-gray-300 rounded overflow-hidden">
-                  <div
-                    className="h-full bg-green-400"
-                    style={{ width: `${confidencePercent}%` }}
-                  />
+                <div
+                  className={`${styles.cardIconContainer} ${categoryConfig.colors.text}`}
+                >
+                  <FontAwesomeIcon icon={categoryConfig.icon} />
                 </div>
-              </div>
-            </li>
-          )
-        })}
-      </ul>
+                <div className="ml-4 flex-1 capitalize">
+                  <p className={`font-bold ${categoryConfig.colors.text}`}>
+                    {detectedObject.name}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {detectedObject.parent}
+                  </p>
+                </div>
+                <div className="ml-2 w-14 text-right flex-shrink-0">
+                  <div className="mb-2">{confidencePercent}%</div>
+                  <div className="h-1 bg-gray-300 rounded overflow-hidden">
+                    <div
+                      className="h-full bg-green-400"
+                      style={{ width: `${confidencePercent}%` }}
+                    />
+                  </div>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
     </section>
   )
 }
