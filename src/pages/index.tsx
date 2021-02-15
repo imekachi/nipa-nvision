@@ -14,36 +14,41 @@ import { detectObjectFromImage } from '../operations/nvision'
 import { convertFileToBase64 } from '../utils/files'
 import { getScalingFactor } from '../utils/sizing'
 
-interface MainState {
+interface ObjectDetectionState {
   isLoading: boolean
   previewDimension?: { width: number; height: number }
   imageDimension?: { width: number; height: number }
   previewScalingFactor?: number
   detectedObjects?: ObjectDetectionResult[]
 }
-const defaultState = {
+interface FilterState {
+  activeObjectIndex: number | null
+  activeCategory: ObjectCategoryName | null
+}
+
+const defaultObjectDetectionState: ObjectDetectionState = {
   isLoading: false,
+}
+const defaultFilterState: FilterState = {
+  activeObjectIndex: null,
+  activeCategory: null,
 }
 
 type ImageInputMode = 'file' | 'camera'
 
 export default function Index() {
-  const [state, setState] = useState<MainState>(defaultState)
-  // TODO: refactor filter into one state
-  const [activeObjectIndex, setActiveObjectIndex] = useState<number | null>(
-    null
-  )
-  const [
-    activeCategory,
-    setActiveCategory,
-  ] = useState<ObjectCategoryName | null>(null)
-
   const [inputMode, setInputMode] = useState<ImageInputMode>('file')
+  const [
+    objectDetectionState,
+    setObjectDetectionState,
+  ] = useState<ObjectDetectionState>(defaultObjectDetectionState)
+  const [filterState, setFilterState] = useState<FilterState>(
+    defaultFilterState
+  )
 
   const resetAllState = () => {
-    setState(defaultState)
-    setActiveCategory(null)
-    setActiveObjectIndex(null)
+    setObjectDetectionState(defaultObjectDetectionState)
+    setFilterState(defaultFilterState)
   }
 
   const switchInputMode = (inputMode: ImageInputMode) => {
@@ -55,10 +60,10 @@ export default function Index() {
     base64,
     dimensions,
   }: SnapPhotoData) => {
-    setState({ isLoading: true })
+    setObjectDetectionState({ isLoading: true })
     const result = await detectObjectFromImage(base64)
 
-    setState({
+    setObjectDetectionState({
       isLoading: false,
       // @ts-ignore, it actually "detected_objects" not "detected_object" as declared in the package
       detectedObjects: result.detected_objects,
@@ -74,7 +79,7 @@ export default function Index() {
   }
 
   const processFile = async ({ file, dimensions }: ProcessFileData) => {
-    setState({ isLoading: true })
+    setObjectDetectionState({ isLoading: true })
     const base64 = await convertFileToBase64(file)
     const imageId = await processImageDetection({ base64, dimensions })
     return imageId as string
@@ -139,35 +144,41 @@ export default function Index() {
             {inputMode === 'camera' && (
               <Camera onSnap={processImageDetection} onReset={resetAllState} />
             )}
-            {!state.isLoading && !!state.detectedObjects && (
-              <div
-                className="absolute top-0 left-0 right-0 bottom-0 m-auto pointer-events-none"
-                style={state.previewDimension}
-              >
-                {state.detectedObjects.map((detectedObject, objectIndex) => {
-                  if (
-                    (Number.isFinite(activeObjectIndex) &&
-                      activeObjectIndex !== objectIndex) ||
-                    (activeCategory && activeCategory !== detectedObject.parent)
-                  ) {
-                    return null
-                  }
-                  return (
-                    <BoundingBox
-                      key={objectIndex}
-                      detectedObject={detectedObject}
-                      scalingFactor={state.previewScalingFactor}
-                    />
-                  )
-                })}
-              </div>
-            )}
+            {!objectDetectionState.isLoading &&
+              !!objectDetectionState.detectedObjects && (
+                <div
+                  className="absolute top-0 left-0 right-0 bottom-0 m-auto pointer-events-none"
+                  style={objectDetectionState.previewDimension}
+                >
+                  {objectDetectionState.detectedObjects.map(
+                    (detectedObject, objectIndex) => {
+                      if (
+                        (Number.isFinite(filterState.activeObjectIndex) &&
+                          filterState.activeObjectIndex !== objectIndex) ||
+                        (filterState.activeCategory &&
+                          filterState.activeCategory !== detectedObject.parent)
+                      ) {
+                        return null
+                      }
+                      return (
+                        <BoundingBox
+                          key={objectIndex}
+                          detectedObject={detectedObject}
+                          scalingFactor={
+                            objectDetectionState.previewScalingFactor
+                          }
+                        />
+                      )
+                    }
+                  )}
+                </div>
+              )}
           </div>
         </div>
         <div className="mt-8">
-          {!state.isLoading &&
-          state.imageDimension &&
-          !state.detectedObjects ? (
+          {!objectDetectionState.isLoading &&
+          objectDetectionState.imageDimension &&
+          !objectDetectionState.detectedObjects ? (
             <div className="text-center text-gray-500">
               We cannot detect anything,
               <br />
@@ -175,11 +186,9 @@ export default function Index() {
             </div>
           ) : (
             <DetectionResult
-              detectedObjects={state.detectedObjects}
-              activeObjectIndex={activeObjectIndex}
-              setActiveObjectIndex={setActiveObjectIndex}
-              activeCategory={activeCategory}
-              setActiveCategory={setActiveCategory}
+              detectedObjects={objectDetectionState.detectedObjects}
+              filterState={filterState}
+              setFilterState={setFilterState}
             />
           )}
         </div>

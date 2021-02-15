@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ObjectDetectionResult } from '@nipacloud/nvision/dist/models/NvisionRequest'
+import React from 'react'
 import {
   defaultObjectCategoryConfig,
   objectCategory,
@@ -10,10 +11,13 @@ import styles from './DetectionResult.module.css'
 
 interface DetectionResultProps {
   detectedObjects?: ObjectDetectionResult[]
-  activeObjectIndex: number | null
-  setActiveObjectIndex: (objectIndex: number | null) => void
-  activeCategory: ObjectCategoryName | null
-  setActiveCategory: (categoryName: ObjectCategoryName | null) => void
+  filterState: {
+    activeObjectIndex: number | null
+    activeCategory: ObjectCategoryName | null
+  }
+  setFilterState: React.Dispatch<
+    React.SetStateAction<DetectionResultProps['filterState']>
+  >
 }
 interface DetectedObjectWithId {
   originalIndex: number
@@ -21,10 +25,8 @@ interface DetectedObjectWithId {
 }
 export default function DetectionResult({
   detectedObjects,
-  activeObjectIndex,
-  setActiveObjectIndex,
-  activeCategory,
-  setActiveCategory,
+  filterState,
+  setFilterState,
 }: DetectionResultProps) {
   if (!detectedObjects) return null
   // Using Set to make the category name unique
@@ -51,17 +53,22 @@ export default function DetectionResult({
               objectCategory[category] ?? defaultObjectCategoryConfig
 
             const handleClickCategory = () => {
-              // Toggle active category to null or the clicked category
-              setActiveCategory(activeCategory === category ? null : category)
-              // Reset active object because it might not in the active category and will cause a bug
-              setActiveObjectIndex(null)
+              setFilterState({
+                // Toggle active category to null or the clicked category
+                activeCategory:
+                  filterState.activeCategory === category ? null : category,
+                // Reset active object because it might not in the active category and will cause a bug
+                activeObjectIndex: null,
+              })
             }
 
             return (
               <li
                 key={category}
                 className={`text-center cursor-pointer ${
-                  activeCategory === category ? categoryConfig.colors.text : ''
+                  filterState.activeCategory === category
+                    ? categoryConfig.colors.text
+                    : ''
                 }`}
                 onClick={handleClickCategory}
               >
@@ -81,7 +88,10 @@ export default function DetectionResult({
         <ul className="space-y-4">
           {sortedObjects.map(({ originalIndex, detectedObject }) => {
             // Skip rendering cards that's not in the active if the activeCategory exists
-            if (activeCategory && activeCategory !== detectedObject.parent) {
+            if (
+              filterState.activeCategory &&
+              filterState.activeCategory !== detectedObject.parent
+            ) {
               return null
             }
 
@@ -97,14 +107,18 @@ export default function DetectionResult({
               // If click on the active index,
               // reverse toggle it by setting activeObjectIndex to null,
               // otherwise, set the originalIndex to be the active one
-              setActiveObjectIndex(
-                activeObjectIndex === originalIndex ? null : originalIndex
-              )
+              setFilterState({
+                ...filterState,
+                activeObjectIndex:
+                  filterState.activeObjectIndex === originalIndex
+                    ? null
+                    : originalIndex,
+              })
             }
 
             let activeClassName = 'shadow-md'
-            if (Number.isFinite(activeObjectIndex)) {
-              if (activeObjectIndex === originalIndex) {
+            if (Number.isFinite(filterState.activeObjectIndex)) {
+              if (filterState.activeObjectIndex === originalIndex) {
                 activeClassName = 'shadow-xl'
               } else {
                 activeClassName = 'shadow-none opacity-50'
