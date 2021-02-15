@@ -1,5 +1,7 @@
-*Powered by Nvision API*
 # Object Detection by Nipa Nvision API
+
+<img src="https://raw.githubusercontent.com/imekachi/nipa-nvision/master/demo-preview.png" alt="Nipa Nvision Object Detection" />
+
 You can try out the [demo page here](https://nipa-nvision.imekachi.vercel.app/).
 
 
@@ -29,5 +31,5 @@ yarn dev
 ```
 5. Open browser and go to [http://localhost:3000](http://localhost:3000)
 
-## Powered by Nvision API
-[Nvision Object detection API](https://docs.nvision.nipa.cloud/how-to-guides/detect-objects)
+## Resources
+- [Nvision Object detection API](https://docs.nvision.nipa.cloud/how-to-guides/detect-objects)
