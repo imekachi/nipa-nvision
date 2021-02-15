@@ -145,7 +145,10 @@ export default function Camera(props: CameraProps) {
 
   return (
     <div>
-      <div className="relative text-center bg-black rounded-2xl overflow-hidden flex items-center justify-center">
+      <div
+        className="relative text-center bg-black rounded-2xl overflow-hidden flex items-center justify-center"
+        style={{ minHeight: 300 }}
+      >
         {!!cameraErrorCode && (
           <div className="p-4 m-4 text-white rounded-lg bg-red-500">
             <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
