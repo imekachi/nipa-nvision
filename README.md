@@ -13,12 +13,12 @@ You can try out the [demo page here](https://nipa-nvision.imekachi.vercel.app/).
 > API key for Nipa Nvision API is required.
 1. clone this repo
 ```bash
-git clone https://github.com/imekachi/nipa-nvision.git
+$ git clone https://github.com/imekachi/nipa-nvision.git
 ```
 2. Install dependencies
 ```bash
-cd nipa-nvision
-yarn
+$ cd nipa-nvision
+$ yarn
 ```
 3. Create a file `.env.local` and add API key
 ```dosini
@@ -27,7 +27,7 @@ API_KEY=your_api_key_here
 ```
 4. Start dev server
 ```bash
-yarn dev
+$ yarn dev
 ```
 5. Open browser and go to [http://localhost:3000](http://localhost:3000)
 
