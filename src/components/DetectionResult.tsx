@@ -7,7 +7,6 @@ import {
   ObjectCategoryName,
 } from '../config/nvision'
 import { mathRoundDigits } from '../utils/number'
-import styles from './DetectionResult.module.css'
 
 interface DetectionResultProps {
   detectedObjects?: ObjectDetectionResult[]
@@ -47,7 +46,7 @@ export default function DetectionResult({
       <h2 className="font-bold mb-4">Detection Result</h2>
       {/* Display category filter only when there are 2 or more categories */}
       {categories.size > 1 && (
-        <ul className={styles.categoryGrid}>
+        <ul className="grid gap-2 py-4 mb-2 grid-cols-[repeat(auto-fill,minmax(80px,1fr))]">
           {Array.from(categories).map((category) => {
             const categoryConfig =
               objectCategory[category] ?? defaultObjectCategoryConfig
@@ -84,7 +83,7 @@ export default function DetectionResult({
           })}
         </ul>
       )}
-      <div className={styles.detectedListWrapper}>
+      <div className="pt-2 pb-8 -mx-2 px-2 overflow-y-auto max-h-[400px]">
         <ul className="space-y-4">
           {sortedObjects.map(({ originalIndex, detectedObject }) => {
             // Skip rendering cards that's not in the active if the activeCategory exists
@@ -132,7 +131,7 @@ export default function DetectionResult({
                 onClick={handleClickItem}
               >
                 <div
-                  className={`${styles.cardIconContainer} ${categoryConfig.colors.text}`}
+                  className={`self-center text-xl text-center min-w-[1.5em] ${categoryConfig.colors.text}`}
                 >
                   <FontAwesomeIcon icon={categoryConfig.icon} />
                 </div>
