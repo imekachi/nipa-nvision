@@ -52,7 +52,6 @@ export default function FileUploader(props: FileUploaderProps) {
   return (
     <div id="fileUploadWrapper" className="relative" ref={fileContainerRef}>
       <FilePond
-        // @ts-ignore
         imagePreviewHeight={300}
         onremovefile={onRemoveFile}
         server={onProcessFile ? { process: processImage } : undefined}
